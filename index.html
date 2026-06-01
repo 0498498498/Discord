@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DC Monitor</title>
+<style>
+  body { background:#0d0f14; color:#dde1f0; font-family:Tahoma; text-align:center; padding:20px; }
+  h2 { color:#00c9a7; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:400px; margin:auto; }
+  .card { background:#13161e; border:1px solid #252a38; border-radius:8px; padding:16px; }
+  .name { font-size:14px; margin-bottom:8px; }
+  .dot { width:16px; height:16px; border-radius:50%; margin:auto; }
+  .monitoring { background:#00e676; box-shadow:0 0 8px #00e676; }
+  .alert { background:#ff4444; box-shadow:0 0 8px #ff4444; }
+  .off { background:#252a38; }
+  .time { font-size:10px; color:#6b7494; margin-top:20px; }
+</style>
+</head>
+<body>
+<h2>DC Monitor</h2>
+<div class="grid" id="grid"></div>
+<div class="time" id="lastUpdate"></div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const firebaseConfig = {
+    databaseURL: "https://dc-monitor-xxxxx-default-rtdb.firebaseio.com/"  // thay link của bạn
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
+
+  onValue(ref(db, "/status"), (snapshot) => {
+    const data = snapshot.val();
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    if (!data) return;
+    for (let i = 1; i <= 4; i++) {
+      const nv = data[`nv${i}`];
+      if (!nv) continue;
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="name">${nv.name}</div>
+        <div class="dot ${nv.state}"></div>
+      `;
+      grid.appendChild(card);
+    }
+    document.getElementById("lastUpdate").innerText = "Cập nhật lúc: " + new Date().toLocaleTimeString("vi-VN");
+  });
+</script>
+</body>
+</html>
