@@ -11,28 +11,42 @@
   .card { background:#13161e; border:1px solid #252a38; border-radius:8px; padding:16px; }
   .name { font-size:14px; margin-bottom:8px; }
   .dot { width:16px; height:16px; border-radius:50%; margin:auto; }
-  .monitoring { background:#00e676; box-shadow:0 0 8px #00e676; }
-  .alert { background:#ff4444; box-shadow:0 0 8px #ff4444; }
+  .monitoring {
+    background:#00e676;
+    box-shadow:0 0 8px #00e676;
+    animation: pulse-green 1.5s ease-in-out infinite;
+  }
+  .alert {
+    background:#ff4444;
+    box-shadow:0 0 8px #ff4444;
+    animation: pulse-red 1.5s ease-in-out infinite;
+  }
   .off { background:#252a38; }
-  .time { font-size:10px; color:#6b7494; margin-top:20px; }
+  @keyframes pulse-green {
+    0%   { opacity:1; box-shadow:0 0 6px #00e676; }
+    50%  { opacity:0.3; box-shadow:0 0 16px #00e676; }
+    100% { opacity:1; box-shadow:0 0 6px #00e676; }
+  }
+  @keyframes pulse-red {
+    0%   { opacity:1; box-shadow:0 0 6px #ff4444; }
+    50%  { opacity:0.3; box-shadow:0 0 16px #ff4444; }
+    100% { opacity:1; box-shadow:0 0 6px #ff4444; }
+  }
+  .time { font-size:15px; color:#00e676; margin-top:20px; font-family:Tahoma; }
 </style>
 </head>
 <body>
 <h2>L2VN.NET - Phuong™</h2>
 <div class="grid" id="grid"></div>
 <div class="time" id="lastUpdate"></div>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
   const firebaseConfig = {
-    databaseURL: "https://cctv-eb850-default-rtdb.firebaseio.com/"  // thay link của bạn
+    databaseURL: "https://cctv-eb850-default-rtdb.firebaseio.com/"
   };
-
   const app = initializeApp(firebaseConfig);
   const db  = getDatabase(app);
-
   onValue(ref(db, "/status"), (snapshot) => {
     const data = snapshot.val();
     const grid = document.getElementById("grid");
@@ -46,6 +60,7 @@
       card.innerHTML = `
         <div class="name">${nv.name}</div>
         <div class="dot ${nv.state}"></div>
+        <div style="font-size:10px;color:#6b7494;margin-top:6px;">${nv.time}</div>
       `;
       grid.appendChild(card);
     }
