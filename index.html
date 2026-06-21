@@ -32,13 +32,20 @@
     50%  { opacity:0.3; box-shadow:0 0 16px #ff4444; }
     100% { opacity:1; box-shadow:0 0 6px #ff4444; }
   }
-  .time { font-size:15px; color:#00e676; margin-top:20px; font-family:Tahoma; }
+  .countdown { font-size:10px; color:#6b7494; margin-top:6px; }
+  .auto { font-size:11px; margin-top:4px; font-weight:bold; }
+  .auto-on { color:#00e676; }
+  .auto-off { color:#ff4444; }
+  .bottom { display:flex; justify-content:space-between; max-width:400px; margin:20px auto 0; font-size:14px; color:#00e676; font-family:Tahoma; }
 </style>
 </head>
 <body>
 <h2>L2VN.NET - Phuong™</h2>
 <div class="grid" id="grid"></div>
-<div class="time" id="lastUpdate"></div>
+<div class="bottom">
+  <span id="appUptime">Online: 00:00:00</span>
+  <span id="serverTime"></span>
+</div>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -60,11 +67,13 @@
       card.innerHTML = `
         <div class="name">${nv.name}</div>
         <div class="dot ${nv.state}"></div>
-        <div style="font-size:10px;color:#6b7494;margin-top:6px;">${nv.time}</div>
+        ${nv.countdown ? `<div class="countdown">${nv.countdown}</div>` : ""}
+        ${nv.auto ? `<div class="auto ${nv.auto === 'ON' ? 'auto-on' : 'auto-off'}">AUTO: ${nv.auto}</div>` : ""}
       `;
       grid.appendChild(card);
     }
-    document.getElementById("lastUpdate").innerText = "Cập nhật lúc: " + new Date().toLocaleTimeString("vi-VN");
+    document.getElementById("appUptime").innerText = "Online: " + (data.app_uptime || "00:00:00");
+    document.getElementById("serverTime").innerText = "Cập nhật lúc: " + (data.server_time || "");
   });
 </script>
 </body>
