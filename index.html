@@ -1,3 +1,12 @@
+<!--
+  Web này host trên GitHub Pages: https://0498498498.github.io/Discord/
+  Cách update: github.com/0498498498/Discord → mở index.html → bút chì (Edit)
+  → sửa → Commit changes. Chờ ~1 phút, Ctrl+F5 để thấy thay đổi.
+  Data đọc từ Firebase Realtime DB (project cctv-eb850), do Discord.py push lên.
+  ĐA NGƯỜI DÙNG: mỗi người có 1 ROOM_ID riêng (khai trong Discord.py).
+  Link xem của từng người: .../Discord/?room=ROOM_ID_của_họ
+  Không có ?room= trên link → web báo thiếu, không hiện gì.
+-->
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -32,11 +41,16 @@
     50%  { opacity:0.3; box-shadow:0 0 16px #ff4444; }
     100% { opacity:1; box-shadow:0 0 6px #ff4444; }
   }
-  .countdown { font-size:10px; color:#6b7494; margin-top:6px; }
-  .auto { font-size:11px; margin-top:4px; font-weight:bold; }
+  .countdown { font-size:10px; color:#6b7494; margin-top:6px; min-height:12px; }
+  .auto { font-size:11px; margin-top:4px; font-weight:bold; min-height:14px; }
   .auto-on { color:#00e676; }
   .auto-off { color:#ff4444; }
   .bottom { display:flex; justify-content:space-between; max-width:400px; margin:20px auto 0; font-size:14px; color:#00e676; font-family:Tahoma; }
+  #gate { max-width:280px; margin:80px auto; }
+  #gate input { width:100%; box-sizing:border-box; padding:10px; font-size:14px; background:#13161e; border:1px solid #252a38; border-radius:6px; color:#dde1f0; margin-bottom:10px; }
+  #gate button { width:100%; padding:10px; font-size:14px; background:#00c9a7; border:none; border-radius:6px; color:#0d0f14; font-weight:bold; cursor:pointer; }
+  #gateErr { color:#ff4444; font-size:12px; margin-top:8px; min-height:16px; }
+  #app { display:none; }
 </style>
 </head>
 <body>
@@ -49,32 +63,40 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-  const firebaseConfig = {
-    databaseURL: "https://cctv-eb850-default-rtdb.firebaseio.com/"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db  = getDatabase(app);
-  onValue(ref(db, "/status"), (snapshot) => {
-    const data = snapshot.val();
-    const grid = document.getElementById("grid");
-    grid.innerHTML = "";
-    if (!data) return;
-    for (let i = 1; i <= 4; i++) {
-      const nv = data[`nv${i}`];
-      if (!nv) continue;
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <div class="name">${nv.name}</div>
-        <div class="dot ${nv.state}"></div>
-        ${nv.countdown ? `<div class="countdown">${nv.countdown}</div>` : ""}
-        ${nv.auto ? `<div class="auto ${nv.auto === 'ON' ? 'auto-on' : 'auto-off'}">AUTO: ${nv.auto}</div>` : ""}
-      `;
-      grid.appendChild(card);
-    }
-    document.getElementById("appUptime").innerText = "Online: " + (data.app_uptime || "00:00:00");
-    document.getElementById("serverTime").innerText = "Cập nhật lúc: " + (data.server_time || "");
-  });
+  const room = new URLSearchParams(location.search).get("room");
+  const grid = document.getElementById("grid");
+  if (!room) {
+    grid.innerHTML = '<div style="grid-column:1/-1;color:#ff4444;">Thiếu ?room= trên link. Hỏi người chia sẻ tool để lấy đúng link.</div>';
+  } else {
+    const firebaseConfig = {
+      databaseURL: "https://cctv-eb850-default-rtdb.firebaseio.com/"
+    };
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+    onValue(ref(db, `/status/${room}`), (snapshot) => {
+      const data = snapshot.val();
+      grid.innerHTML = "";
+      if (!data) {
+        grid.innerHTML = '<div style="grid-column:1/-1;color:#6b7494;">Chưa có dữ liệu cho room này.</div>';
+        return;
+      }
+      for (let i = 1; i <= 4; i++) {
+        const nv = data[`nv${i}`];
+        if (!nv) continue;
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="name">${nv.name}</div>
+          <div class="dot ${nv.state}"></div>
+          <div class="countdown">${nv.countdown ? `Thời gian biến hình: ${nv.countdown}` : ""}</div>
+          <div class="auto ${nv.auto === 'ON' ? 'auto-on' : nv.auto === 'OFF' ? 'auto-off' : ''}">${nv.auto ? `Auto Hunting: ${nv.auto}` : ""}</div>
+        `;
+        grid.appendChild(card);
+      }
+      document.getElementById("appUptime").innerText = "Online: " + (data.app_uptime || "00:00:00");
+      document.getElementById("serverTime").innerText = "Cập nhật lúc: " + (data.server_time || "");
+    });
+  }
 </script>
 </body>
 </html>
