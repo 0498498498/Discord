@@ -14,43 +14,109 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>L2VN.NET - Phuong™</title>
 <style>
-  body { background:#0d0f14; color:#dde1f0; font-family:Tahoma; text-align:center; padding:20px; }
-  h2 { color:#00c9a7; }
-  .grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; max-width:400px; margin:auto; }
-  .card { background:#13161e; border:1px solid #252a38; border-radius:8px; padding:16px; }
-  .name { font-size:14px; margin-bottom:8px; }
-  .dot { width:16px; height:16px; border-radius:50%; margin:auto; }
-  .monitoring {
-    background:#00e676;
-    box-shadow:0 0 8px #00e676;
-    animation: pulse-green 1.5s ease-in-out infinite;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d0f14;
+    color: #dde1f0;
+    font-family: Tahoma, sans-serif;
+    text-align: center;
+    padding: 16px 12px 12px;
+    min-height: 100vh;
   }
-  .alert {
-    background:#ff4444;
-    box-shadow:0 0 8px #ff4444;
-    animation: pulse-red 1.5s ease-in-out infinite;
+  h2 { color: #00c9a7; font-size: 15px; margin-bottom: 12px; letter-spacing: 1px; }
+
+  /* --- GRID 4 CARDS --- */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    max-width: 400px;
+    margin: 0 auto;
   }
-  .off { background:#252a38; }
-  @keyframes pulse-green {
-    0%   { opacity:1; box-shadow:0 0 6px #00e676; }
-    50%  { opacity:0.3; box-shadow:0 0 16px #00e676; }
-    100% { opacity:1; box-shadow:0 0 6px #00e676; }
+  .card {
+    background: #13161e;
+    border: 1px solid #252a38;
+    border-radius: 8px;
+    padding: 12px 10px 10px;
   }
-  @keyframes pulse-red {
-    0%   { opacity:1; box-shadow:0 0 6px #ff4444; }
-    50%  { opacity:0.3; box-shadow:0 0 16px #ff4444; }
-    100% { opacity:1; box-shadow:0 0 6px #ff4444; }
+  .name { font-size: 13px; margin-bottom: 8px; color: #dde1f0; }
+
+  /* --- HEART DOT (thay 🟢) --- */
+  .heart-wrap { height: 20px; display: flex; align-items: center; justify-content: center; }
+  .heart {
+    font-size: 16px;
+    line-height: 1;
+    /* default: muted/off */
+    color: #252a38;
   }
-  .countdown { font-size:10px; color:#6b7494; margin-top:6px; min-height:12px; }
-  .auto { font-size:11px; margin-top:4px; font-weight:bold; min-height:14px; color:#dde1f0; }
-  .auto-on { color:#00e676; }
-  .auto-off { color:#ff4444; }
-  .bottom { display:flex; justify-content:space-between; max-width:400px; margin:20px auto 0; font-size:14px; color:#00e676; font-family:Tahoma; }
-  #gate { max-width:280px; margin:80px auto; }
-  #gate input { width:100%; box-sizing:border-box; padding:10px; font-size:14px; background:#13161e; border:1px solid #252a38; border-radius:6px; color:#dde1f0; margin-bottom:10px; }
-  #gate button { width:100%; padding:10px; font-size:14px; background:#00c9a7; border:none; border-radius:6px; color:#0d0f14; font-weight:bold; cursor:pointer; }
-  #gateErr { color:#ff4444; font-size:12px; margin-top:8px; min-height:16px; }
-  #app { display:none; }
+  /* monitoring: xanh lá, fade in/out 2s, fade out = opacity 0 hoàn toàn */
+  .heart.monitoring {
+    color: #00e676;
+    animation: heart-fade 2s ease-in-out infinite;
+  }
+  /* alert: đỏ, cùng animation */
+  .heart.alert {
+    color: #ff4444;
+    animation: heart-fade 2s ease-in-out infinite;
+  }
+  @keyframes heart-fade {
+    0%   { opacity: 1; }
+    49%  { opacity: 0; }
+    50%  { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  .countdown { font-size: 10px; color: #6b7494; margin-top: 6px; min-height: 13px; }
+
+  /* Auto Hunting row — luôn hiện chữ "Auto Hunting:" màu muted */
+  .auto-row { font-size: 11px; margin-top: 4px; min-height: 15px; color: #6b7494; }
+  .auto-row .hunt-val { font-weight: bold; }
+  .auto-row .hunt-on  { color: #00e676; }
+  .auto-row .hunt-off { color: #ff4444; }
+  .auto-row .hunt-na  { color: #6b7494; }
+
+  /* --- BOTTOM BAR --- */
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    max-width: 400px;
+    margin: 8px auto 0;
+    font-size: 12px;
+    color: #00e676;
+  }
+
+  /* --- EVENT LOG --- */
+  .events-wrap {
+    max-width: 400px;
+    margin: 10px auto 0;
+    background: #13161e;
+    border: 1px solid #252a38;
+    border-radius: 8px;
+    padding: 8px 10px;
+    text-align: left;
+  }
+  .events-title {
+    font-size: 11px;
+    color: #6b7494;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .event-line {
+    font-size: 11px;
+    color: #6b7494;
+    padding: 2px 0;
+    border-bottom: 1px solid #1a1e29;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .event-line:last-child { border-bottom: none; }
+  /* highlight biến hình thành công */
+  .event-line.ok  { color: #00e676; }
+  /* highlight thất bại */
+  .event-line.fail { color: #ff4444; }
+  .events-empty { font-size: 11px; color: #252a38; font-style: italic; }
 </style>
 </head>
 <body>
@@ -60,41 +126,84 @@
   <span id="appUptime">Online: 00:00:00</span>
   <span id="serverTime"></span>
 </div>
+<div class="events-wrap" id="eventsWrap">
+  <div class="events-title">Lịch sử</div>
+  <div class="events-empty" id="eventsEmpty">Chưa có hoạt động.</div>
+  <div id="eventsList"></div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
   const room = new URLSearchParams(location.search).get("room");
   const grid = document.getElementById("grid");
+
   if (!room) {
-    grid.innerHTML = '<div style="grid-column:1/-1;color:#ff4444;">Thiếu ?room= trên link. Hỏi người chia sẻ tool để lấy đúng link.</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;color:#ff4444;font-size:13px;">Thiếu ?room= trên link. Hỏi người chia sẻ tool để lấy đúng link.</div>';
+    document.getElementById("eventsWrap").style.display = "none";
   } else {
-    const firebaseConfig = {
-      databaseURL: "https://cctv-eb850-default-rtdb.firebaseio.com/"
-    };
+    const firebaseConfig = { databaseURL: "https://cctv-eb850-default-rtdb.firebaseio.com/" };
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
+
     onValue(ref(db, `/status/${room}`), (snapshot) => {
       const data = snapshot.val();
       grid.innerHTML = "";
+
       if (!data) {
-        grid.innerHTML = '<div style="grid-column:1/-1;color:#6b7494;">Chưa có dữ liệu cho room này.</div>';
+        grid.innerHTML = '<div style="grid-column:1/-1;color:#6b7494;font-size:13px;">Chưa có dữ liệu cho room này.</div>';
         return;
       }
+
       for (let i = 1; i <= 4; i++) {
         const nv = data[`nv${i}`];
         if (!nv) continue;
+
+        // Auto Hunting value
+        let huntHtml = "";
+        if (!nv.auto || nv.auto === "") {
+          huntHtml = `<span class="hunt-val hunt-na">N/A</span>`;
+        } else if (nv.auto === "ON") {
+          huntHtml = `<span class="hunt-val hunt-on">ON</span>`;
+        } else {
+          huntHtml = `<span class="hunt-val hunt-off">OFF</span>`;
+        }
+
         const card = document.createElement("div");
         card.className = "card";
         card.innerHTML = `
           <div class="name">${nv.name}</div>
-          <div class="dot ${nv.state}"></div>
-          <div class="countdown">${nv.countdown ? `Thời gian biến hình: ${nv.countdown}` : ""}</div>
-          <div class="auto ${nv.auto === 'ON' ? 'auto-on' : nv.auto === 'OFF' ? 'auto-off' : ''}">${nv.auto ? `Auto Hunting: ${nv.auto}` : ""}</div>
+          <div class="heart-wrap">
+            <span class="heart ${nv.state || 'off'}">♥</span>
+          </div>
+          <div class="countdown">${nv.countdown ? "Biến hình: " + nv.countdown : ""}</div>
+          <div class="auto-row">Auto Hunting: ${huntHtml}</div>
         `;
         grid.appendChild(card);
       }
+
       document.getElementById("appUptime").innerText = "Online: " + (data.app_uptime || "00:00:00");
-      document.getElementById("serverTime").innerText = "Cập nhật lúc: " + (data.server_time || "");
+      document.getElementById("serverTime").innerText = "Cập nhật: " + (data.server_time || "");
+
+      // Event log
+      const events = data.events;
+      const eventsEmpty = document.getElementById("eventsEmpty");
+      const eventsList  = document.getElementById("eventsList");
+      eventsList.innerHTML = "";
+      if (!events || events.length === 0) {
+        eventsEmpty.style.display = "block";
+      } else {
+        eventsEmpty.style.display = "none";
+        events.forEach(msg => {
+          const div = document.createElement("div");
+          // phân loại màu: thất bại → đỏ, thành công → xanh
+          const isFail = msg.includes("không biến hình");
+          div.className = "event-line " + (isFail ? "fail" : "ok");
+          div.textContent = msg;
+          eventsList.appendChild(div);
+        });
+      }
     });
   }
 </script>
