@@ -52,12 +52,12 @@
   /* monitoring: xanh lá, fade in/out 2s, fade out = opacity 0 hoàn toàn */
   .heart.monitoring {
     color: #00e676;
-    animation: heart-fade 2s ease-in-out infinite;
+    animation: heart-fade 5s ease-in-out infinite;
   }
   /* alert: đỏ, cùng animation */
   .heart.alert {
     color: #ff4444;
-    animation: heart-fade 2s ease-in-out infinite;
+    animation: heart-fade 5s ease-in-out infinite;
   }
   @keyframes heart-fade {
     0%   { opacity: 1; }
@@ -65,6 +65,11 @@
     50%  { opacity: 0; }
     100% { opacity: 1; }
   }
+
+  .card.muted .name,
+  .card.muted .countdown,
+  .card.muted .auto-row { color: #252a38; }
+  .card.muted .hunt-val { color: #252a38 !important; }
 
   .countdown { font-size: 10px; color: #6b7494; margin-top: 6px; min-height: 13px; }
 
@@ -170,12 +175,13 @@
           huntHtml = `<span class="hunt-val hunt-off">OFF</span>`;
         }
 
+        const isOff = !nv.state || nv.state === "off";
         const card = document.createElement("div");
-        card.className = "card";
+        card.className = "card" + (isOff ? " muted" : "");
         card.innerHTML = `
           <div class="name">${nv.name}</div>
           <div class="heart-wrap">
-            <span class="heart ${nv.state || 'off'}">♥</span>
+            ${isOff ? "" : `<span class="heart ${nv.state}">♥</span>`}
           </div>
           <div class="countdown">${nv.countdown ? "Biến hình: " + nv.countdown : ""}</div>
           <div class="auto-row">Auto Hunting: ${huntHtml}</div>
@@ -195,7 +201,7 @@
         eventsEmpty.style.display = "block";
       } else {
         eventsEmpty.style.display = "none";
-        events.forEach(msg => {
+        events.slice(-20).forEach(msg => {
           const div = document.createElement("div");
           // phân loại màu: thất bại → đỏ, thành công → xanh
           const isFail = msg.includes("không biến hình");
