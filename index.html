@@ -205,7 +205,7 @@
       } else {
         serverTimeEl.style.color = "#00e676";
         const st = data.server_time || "";
-        serverTimeEl.innerText = "Cập nhật: " + st + (st ? " " : "") + `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+        serverTimeEl.innerText = `Cập nhật: ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
       }
 
       // Event log
