@@ -60,10 +60,9 @@
     animation: heart-fade 5s ease-in-out infinite;
   }
   @keyframes heart-fade {
-    0%   { opacity: 1; }
-    49%  { opacity: 0; }
-    50%  { opacity: 0; }
-    100% { opacity: 1; }
+    0%   { opacity: 1; filter: brightness(2) saturate(2); }
+    50%  { opacity: 0; filter: brightness(1) saturate(1); }
+    100% { opacity: 1; filter: brightness(2) saturate(2); }
   }
 
   .card.muted .name,
@@ -190,7 +189,24 @@
       }
 
       document.getElementById("appUptime").innerText = "Online: " + (data.app_uptime || "00:00:00");
-      document.getElementById("serverTime").innerText = "Cập nhật: " + (data.server_time || "");
+      // Check all NV off → mất tín hiệu
+      let anyActive = false;
+      for (let i = 1; i <= 4; i++) {
+        const nv = data[`nv${i}`];
+        if (nv && nv.state && nv.state !== "off") { anyActive = true; break; }
+      }
+      const now = new Date();
+      const pad = n => String(n).padStart(2, "0");
+      const nowStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+      const serverTimeEl = document.getElementById("serverTime");
+      if (!anyActive) {
+        serverTimeEl.style.color = "#ff4444";
+        serverTimeEl.innerText = "Mất tín hiệu: " + nowStr;
+      } else {
+        serverTimeEl.style.color = "#00e676";
+        const st = data.server_time || "";
+        serverTimeEl.innerText = "Cập nhật: " + st + (st ? " " : "") + `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+      }
 
       // Event log
       const events = data.events;
