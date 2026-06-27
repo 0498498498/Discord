@@ -208,7 +208,20 @@
         // -- Active
         const act = document.createElement("div");
         act.className = "card-line c-muted";
-        act.innerHTML = 'Active: <span style="color:#6b7494">' + (nv.active || "--:--") + "</span>";
+        let activeStr = "--:--";
+        if (nv.active) {
+          const parts = nv.active.split(":").map(Number);
+          const totalSec = parts[0]*3600 + parts[1]*60 + (parts[2]||0);
+          if (totalSec < 86400) {
+            activeStr = nv.active;
+          } else {
+            const days = Math.floor(totalSec / 86400);
+            const hrs  = Math.floor((totalSec % 86400) / 3600);
+            const mins = Math.floor((totalSec % 3600) / 60);
+            activeStr = `${days} ngày ${hrs} tiếng ${mins} phút`;
+          }
+        }
+        act.innerHTML = 'Active: <span style="color:#6b7494">' + activeStr + "</span>";
         card.appendChild(act);
 
         // Ẩn hết nếu off
