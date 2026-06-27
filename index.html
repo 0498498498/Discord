@@ -5,7 +5,6 @@
   Data đọc từ Firebase Realtime DB (project cctv-eb850), do Discord.py push lên.
   ĐA NGƯỜI DÙNG: mỗi người có 1 ROOM_ID riêng (khai trong Discord.py).
   Link xem của từng người: .../Discord/?room=ROOM_ID_của_họ
-  Không có ?room= trên link → web báo thiếu, không hiện gì.
 -->
 <!DOCTYPE html>
 <html lang="vi">
@@ -20,92 +19,75 @@
     color: #dde1f0;
     font-family: Tahoma, sans-serif;
     text-align: center;
-    padding: 16px 12px 12px;
+    padding: 14px 10px 10px;
     min-height: 100vh;
   }
-  h2 { color: #00c9a7; font-size: 15px; margin-bottom: 12px; letter-spacing: 1px; }
+  h2 { color: #00c9a7; font-size: 14px; margin-bottom: 10px; letter-spacing: 1px; }
 
   /* --- GRID 4 CARDS --- */
   .grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 8px;
     max-width: 400px;
     margin: 0 auto;
   }
   .card {
     background: #13161e;
     border: 1px solid #252a38;
-    border-radius: 8px;
-    padding: 12px 10px 10px;
+    border-radius: 6px;
+    padding: 8px 0 7px 0;
+    text-align: left;
   }
-  .name { font-size: 13px; margin-bottom: 8px; color: #dde1f0; }
+  .card.muted { opacity: 0.38; }
 
-  /* --- HEART DOT (thay 🟢) --- */
-  .heart-wrap { height: 20px; display: flex; align-items: center; justify-content: center; }
-  .heart {
-    font-size: 16px;
-    line-height: 1;
-    /* default: muted/off */
-    color: #252a38;
-  }
-  /* monitoring: xanh lá, fade in/out 2s, fade out = opacity 0 hoàn toàn */
-  .heart.monitoring {
-    color: #00e676;
-    animation: heart-fade 5s ease-in-out infinite;
-  }
-  /* alert: đỏ, cùng animation */
-  .heart.alert {
-    color: #ff4444;
-    animation: heart-fade 5s ease-in-out infinite;
-  }
-  @keyframes heart-fade {
-    0%   { opacity: 1; filter: brightness(2) saturate(2); }
-    50%  { opacity: 0; filter: brightness(1) saturate(1); }
-    100% { opacity: 1; filter: brightness(2) saturate(2); }
+  /* tất cả dòng trong card cách trái 5px */
+  .card-line {
+    font-size: 11px;
+    padding: 1px 6px 1px 5px;
+    line-height: 1.45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .card.muted .name,
-  .card.muted .countdown,
-  .card.muted .auto-row { color: #252a38; }
-  .card.muted .hunt-val { color: #252a38 !important; }
-
-  .countdown { font-size: 10px; color: #6b7494; margin-top: 6px; min-height: 13px; }
-
-  /* Auto Hunting row — luôn hiện chữ "Auto Hunting:" màu muted */
-  .auto-row { font-size: 11px; margin-top: 4px; min-height: 15px; color: #6b7494; }
-  .auto-row .hunt-val { font-weight: bold; }
-  .auto-row .hunt-on  { color: #00e676; }
-  .auto-row .hunt-off { color: #ff4444; }
-  .auto-row .hunt-na  { color: #6b7494; }
+  .c-name    { color: #00e676; font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+  .c-name.off{ color: #252a38; }
+  .c-muted   { color: #6b7494; }
+  .c-text    { color: #dde1f0; }
+  .c-border  { color: #252a38; }
+  .c-green   { color: #00e676; }
+  .c-red     { color: #ff4444; }
 
   /* --- BOTTOM BAR --- */
   .bottom {
     display: flex;
     justify-content: space-between;
     max-width: 400px;
-    margin: 8px auto 0;
-    font-size: 12px;
-    color: #00e676;
+    margin: 7px auto 0;
+    font-size: 11px;
   }
+  .bottom-left  { color: #6b7494; }
+  .bottom-right { color: #6b7494; }
+  .bottom-right .val-green { color: #00e676; }
 
   /* --- EVENT LOG --- */
   .events-wrap {
     max-width: 400px;
-    margin: 10px auto 0;
+    margin: 8px auto 0;
     background: #13161e;
     border: 1px solid #252a38;
-    border-radius: 8px;
-    padding: 8px 10px;
+    border-radius: 6px;
+    padding: 7px 8px;
     text-align: left;
   }
   .events-title {
     font-size: 11px;
     color: #6b7494;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+    letter-spacing: 0.4px;
   }
+  .events-title .date-str { color: #6b7494; font-weight: normal; }
   .event-line {
     font-size: 11px;
     color: #6b7494;
@@ -116,22 +98,39 @@
     text-overflow: ellipsis;
   }
   .event-line:last-child { border-bottom: none; }
-  /* highlight biến hình thành công */
-  .event-line.ok  { color: #00e676; }
-  /* highlight thất bại */
+  .event-line.ok   { color: #00e676; }
   .event-line.fail { color: #ff4444; }
   .events-empty { font-size: 11px; color: #252a38; font-style: italic; }
+
+  /* --- ONLINE BOX --- */
+  .online-wrap {
+    max-width: 400px;
+    margin: 8px auto 0;
+    background: #13161e;
+    border: 1px solid #252a38;
+    border-radius: 6px;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 11px;
+    color: #6b7494;
+  }
 </style>
 </head>
 <body>
 <h2>L2VN.NET - Phuong™</h2>
 <div class="grid" id="grid"></div>
+
 <div class="bottom">
-  <span id="appUptime">Online: 00:00:00</span>
-  <span id="serverTime"></span>
+  <span class="bottom-left" id="appOnline">App Online: --:--:--</span>
+  <span class="bottom-right" id="serverTime">Cập Nhật: --</span>
 </div>
+
+<div class="online-wrap" id="onlineWrap" style="display:none">
+  <span class="c-muted" id="onlineStatus"></span>
+</div>
+
 <div class="events-wrap" id="eventsWrap">
-  <div class="events-title">Lịch sử</div>
+  <div class="events-title">Lịch Sử <span class="date-str" id="logDate"></span></div>
   <div class="events-empty" id="eventsEmpty">Chưa có hoạt động.</div>
   <div id="eventsList"></div>
 </div>
@@ -144,19 +143,21 @@
   const grid = document.getElementById("grid");
 
   if (!room) {
-    grid.innerHTML = '<div style="grid-column:1/-1;color:#ff4444;font-size:13px;">Thiếu ?room= trên link. Hỏi người chia sẻ tool để lấy đúng link.</div>';
+    grid.innerHTML = '<div style="grid-column:1/-1;color:#ff4444;font-size:12px;">Thiếu ?room= trên link.</div>';
     document.getElementById("eventsWrap").style.display = "none";
   } else {
     const firebaseConfig = { databaseURL: "https://cctv-eb850-default-rtdb.firebaseio.com/" };
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
+    const pad = n => String(n).padStart(2, "0");
+
     onValue(ref(db, `/status/${room}`), (snapshot) => {
       const data = snapshot.val();
       grid.innerHTML = "";
 
       if (!data) {
-        grid.innerHTML = '<div style="grid-column:1/-1;color:#6b7494;font-size:13px;">Chưa có dữ liệu cho room này.</div>';
+        grid.innerHTML = '<div style="grid-column:1/-1;color:#6b7494;font-size:12px;">Chưa có dữ liệu.</div>';
         return;
       }
 
@@ -164,62 +165,107 @@
         const nv = data[`nv${i}`];
         if (!nv) continue;
 
-        // Auto Hunting value
-        let huntHtml = "";
+        const isOff = !nv.state || nv.state === "off";
+        const card  = document.createElement("div");
+        card.className = "card" + (isOff ? " muted" : "");
+
+        // -- Tên nhân vật
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "card-line c-name" + (isOff ? " off" : "");
+        nameDiv.textContent = nv.name || `NV${i}`;
+        card.appendChild(nameDiv);
+
+        // -- Biến hình
+        const bh = document.createElement("div");
+        bh.className = "card-line c-muted";
+        bh.textContent = "Biến hình: " + (nv.countdown || "--:--:--");
+        card.appendChild(bh);
+
+        // -- Auto Hunting
+        const ah = document.createElement("div");
+        ah.className = "card-line c-muted";
+        let huntVal = "";
         if (!nv.auto || nv.auto === "") {
-          huntHtml = `<span class="hunt-val hunt-na">N/A</span>`;
+          huntVal = '<span style="color:#6b7494">N/A</span>';
         } else if (nv.auto === "ON") {
-          huntHtml = `<span class="hunt-val hunt-on">ON</span>`;
+          huntVal = '<span style="color:#00e676;font-weight:bold">ON</span>';
         } else {
-          huntHtml = `<span class="hunt-val hunt-off">OFF</span>`;
+          huntVal = '<span style="color:#ff4444;font-weight:bold">OFF</span>';
+        }
+        ah.innerHTML = '<span style="color:#6b7494">Auto Hunting: </span>' + huntVal;
+        card.appendChild(ah);
+
+        // -- CPU | RAM
+        const cpuram = document.createElement("div");
+        cpuram.className = "card-line";
+        const cpuCol = nv.cpu  ? "#dde1f0" : "#252a38";
+        const ramCol = nv.ram  ? "#dde1f0" : "#252a38";
+        cpuram.innerHTML =
+          `<span style="color:#6b7494">CPU: </span><span style="color:${cpuCol}">${nv.cpu || "---"}</span>` +
+          `<span style="color:#6b7494"> | RAM: </span><span style="color:${ramCol}">${nv.ram || "---"}</span>`;
+        card.appendChild(cpuram);
+
+        // -- Active
+        const act = document.createElement("div");
+        act.className = "card-line c-muted";
+        act.innerHTML = 'Active: <span style="color:#6b7494">' + (nv.active || "--:--") + "</span>";
+        card.appendChild(act);
+
+        // Ẩn hết nếu off
+        if (isOff) {
+          [bh, ah, cpuram, act].forEach(el => el.style.display = "none");
         }
 
-        const isOff = !nv.state || nv.state === "off";
-        const card = document.createElement("div");
-        card.className = "card" + (isOff ? " muted" : "");
-        card.innerHTML = `
-          <div class="name">${nv.name}</div>
-          <div class="heart-wrap">
-            ${isOff ? "" : `<span class="heart ${nv.state}">♥</span>`}
-          </div>
-          <div class="countdown">${nv.countdown ? "Biến hình: " + nv.countdown : ""}</div>
-          <div class="auto-row">Auto Hunting: ${huntHtml}</div>
-        `;
         grid.appendChild(card);
       }
 
-      document.getElementById("appUptime").innerText = "Online: " + (data.app_uptime || "00:00:00");
-      // Check all NV off → mất tín hiệu
+      // App Online
+      document.getElementById("appOnline").textContent = "App Online: " + (data.app_uptime || "--:--:--");
+
+      // Cập Nhật
+      const now = new Date();
+      const timeStr = pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+      const dateStr = pad(now.getDate()) + "/" + pad(now.getMonth()+1) + "/" + now.getFullYear();
+      const st = data.server_time || "";
+      const serverEl = document.getElementById("serverTime");
+
       let anyActive = false;
       for (let i = 1; i <= 4; i++) {
         const nv = data[`nv${i}`];
         if (nv && nv.state && nv.state !== "off") { anyActive = true; break; }
       }
-      const now = new Date();
-      const pad = n => String(n).padStart(2, "0");
-      const nowStr = `${pad(now.getHours())}:${pad(now.getMinutes())} ${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
-      const serverTimeEl = document.getElementById("serverTime");
+
       if (!anyActive) {
-        serverTimeEl.style.color = "#ff4444";
-        serverTimeEl.innerText = "Mất tín hiệu: " + nowStr;
+        serverEl.innerHTML = '<span class="c-red">Mất tín hiệu: ' + timeStr + '</span>';
       } else {
-        serverTimeEl.style.color = "#00e676";
-        const st = data.server_time || "";
-        serverTimeEl.innerText = `Cập nhật: ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} ${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+        serverEl.innerHTML =
+          'Cập Nhật: <span class="val-green">' + (st || timeStr) + '</span>' +
+          ' <span style="color:#6b7494">' + dateStr + '</span>';
+      }
+
+      // Online box — App Online
+      const onlineWrap = document.getElementById("onlineWrap");
+      onlineWrap.style.display = "none";
+
+      // Log date
+      const logDateEl = document.getElementById("logDate");
+      if (data.log_date) {
+        logDateEl.textContent = "Ngày " + data.log_date;
+      } else {
+        logDateEl.textContent = "Ngày " + dateStr;
       }
 
       // Event log
-      const events = data.events;
       const eventsEmpty = document.getElementById("eventsEmpty");
       const eventsList  = document.getElementById("eventsList");
       eventsList.innerHTML = "";
+      const events = data.events;
       if (!events || events.length === 0) {
         eventsEmpty.style.display = "block";
       } else {
         eventsEmpty.style.display = "none";
         events.slice(-20).forEach(msg => {
           const div = document.createElement("div");
-          // phân loại màu: thất bại → đỏ, thành công → xanh
           const isFail = msg.includes("không biến hình");
           div.className = "event-line " + (isFail ? "fail" : "ok");
           div.textContent = msg;
