@@ -1,0 +1,256 @@
+<!--
+  Web này host trên GitHub Pages: https://0498498498.github.io/Discord/
+  Cách update: github.com/0498498498/Discord → mở index.html → bút chì (Edit)
+  → sửa → Commit changes. Chờ ~1 phút, Ctrl+F5 để thấy thay đổi.
+  Data đọc từ Firebase Realtime DB (project cctv-eb850), do Discord.py push lên.
+  ĐA NGƯỜI DÙNG: mỗi người có 1 ROOM_ID riêng (khai trong Discord.py).
+  Link xem của từng người: .../Discord/?room=ROOM_ID_của_họ
+-->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lineage 2 - Mr.Phước</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0d0f14;
+    color: #dde1f0;
+    font-family: Tahoma, sans-serif;
+    text-align: center;
+    padding: 14px 10px 10px;
+    min-height: 100vh;
+  }
+  h2 { color: #00c9a7; font-size: 14px; margin-bottom: 10px; letter-spacing: 1px; }
+
+  /* --- GRID 4 CARDS --- */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+  .events-wrap, .online-wrap { max-width: 400px; }
+  .card {
+    background: #13161e;
+    border: 1px solid #252a38;
+    border-radius: 6px;
+    padding: 8px 0 7px 0;
+    text-align: left;
+  }
+  .card.muted { opacity: 0.38; }
+
+  /* tất cả dòng trong card cách trái 5px */
+  .card-line {
+    font-size: 11px;
+    padding: 1px 6px 1px 5px;
+    line-height: 1.45;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .c-name    { color: #00e676; font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+  .c-name.off{ color: #252a38; }
+  .c-muted   { color: #6b7494; }
+  .c-text    { color: #dde1f0; }
+  .c-border  { color: #252a38; }
+  .c-green   { color: #00e676; }
+  .c-red     { color: #ff4444; }
+
+  /* --- BOTTOM BAR --- */
+  .bottom {
+    display: flex;
+    justify-content: space-between;
+    max-width: 400px;
+    margin: 7px auto 0;
+    font-size: 11px;
+  }
+  .bottom-left  { color: #6b7494; }
+  .bottom-right { color: #6b7494; }
+  .bottom-right .val-green { color: #00e676; }
+
+  /* --- EVENT LOG --- */
+  .events-wrap {
+    max-width: 400px;
+    margin: 8px auto 0;
+    background: #13161e;
+    border: 1px solid #252a38;
+    border-radius: 6px;
+    padding: 7px 8px;
+    text-align: left;
+  }
+  .events-title {
+    font-size: 11px;
+    color: #6b7494;
+    margin-bottom: 5px;
+    letter-spacing: 0.4px;
+  }
+  .events-title .date-str { color: #6b7494; font-weight: normal; }
+  .event-line {
+    font-size: 11px;
+    color: #6b7494;
+    padding: 2px 0;
+    border-bottom: 1px solid #1a1e29;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .event-line:last-child { border-bottom: none; }
+  .event-line.ok   { color: #00e676; }
+  .event-line.fail { color: #ff4444; }
+  .events-empty { font-size: 11px; color: #252a38; font-style: italic; }
+
+  /* --- ONLINE BOX --- */
+  .online-wrap {
+    max-width: 400px;
+    margin: 8px auto 0;
+    background: #13161e;
+    border: 1px solid #252a38;
+    border-radius: 6px;
+    padding: 6px 8px;
+    text-align: left;
+    font-size: 11px;
+    color: #6b7494;
+  }
+</style>
+</head>
+<body>
+<h2>Lineage 2 - Mr. Phước</h2>
+<div class="grid" id="grid"></div>
+
+<div class="bottom">
+  <span class="bottom-left" id="appOnline">App Online: --:--:--</span>
+  <span class="bottom-right" id="serverTime">Cập Nhật: --</span>
+</div>
+
+<div class="online-wrap" id="onlineWrap" style="display:none">
+  <span class="c-muted" id="onlineStatus"></span>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  const room = new URLSearchParams(location.search).get("room");
+  const grid = document.getElementById("grid");
+
+  if (!room) {
+    grid.innerHTML = '<div style="grid-column:1/-1;color:#ff4444;font-size:12px;">Thiếu ?room= trên link.</div>';
+    document.getElementById("eventsWrap").style.display = "none";
+  } else {
+    const firebaseConfig = { databaseURL: "https://cctv-eb850-default-rtdb.firebaseio.com/" };
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+
+    const pad = n => String(n).padStart(2, "0");
+
+    onValue(ref(db, `/status/${room}`), (snapshot) => {
+      const data = snapshot.val();
+      grid.innerHTML = "";
+
+      if (!data) {
+        grid.innerHTML = '<div style="grid-column:1/-1;color:#6b7494;font-size:12px;">Chưa có dữ liệu.</div>';
+        return;
+      }
+
+      for (let i = 1; i <= 10; i++) {
+        const nv = data[`nv${i}`];
+        if (!nv) continue;
+
+        const isOff = !nv.state || nv.state === "off";
+        const card  = document.createElement("div");
+        card.className = "card" + (isOff ? " muted" : "");
+
+        // -- Tên nhân vật
+        const nameDiv = document.createElement("div");
+        nameDiv.className = "card-line c-name" + (isOff ? " off" : "");
+        nameDiv.textContent = nv.name || `NV${i}`;
+        card.appendChild(nameDiv);
+
+        // -- Auto Hunting
+        const ah = document.createElement("div");
+        ah.className = "card-line c-muted";
+        let huntVal = "";
+        if (!nv.auto || nv.auto === "") {
+          huntVal = '<span style="color:#6b7494">N/A</span>';
+        } else if (nv.auto === "ON") {
+          huntVal = '<span style="color:#00e676;font-weight:bold">ON</span>';
+        } else {
+          huntVal = '<span style="color:#ff4444;font-weight:bold">OFF</span>';
+        }
+        ah.innerHTML = '<span style="color:#6b7494">Auto Hunting: </span>' + huntVal;
+        card.appendChild(ah);
+
+        // -- CPU | RAM
+        const cpuram = document.createElement("div");
+        cpuram.className = "card-line";
+        const cpuCol = nv.cpu  ? "#dde1f0" : "#252a38";
+        const ramCol = nv.ram  ? "#dde1f0" : "#252a38";
+        cpuram.innerHTML =
+          `<span style="color:#6b7494">CPU: </span><span style="color:${cpuCol}">${nv.cpu || "---"}</span>` +
+          `<span style="color:#6b7494"> | RAM: </span><span style="color:${ramCol}">${nv.ram || "---"}</span>`;
+        card.appendChild(cpuram);
+
+        // -- Active
+        const act = document.createElement("div");
+        act.className = "card-line c-muted";
+        let activeStr = "--:--";
+        if (nv.active) {
+          const parts = nv.active.split(":").map(Number);
+          const totalSec = parts[0]*3600 + parts[1]*60 + (parts[2]||0);
+          if (totalSec < 86400) {
+            activeStr = nv.active;
+          } else {
+            const days = Math.floor(totalSec / 86400);
+            const hrs  = Math.floor((totalSec % 86400) / 3600);
+            const mins = Math.floor((totalSec % 3600) / 60);
+            activeStr = `${days} ngày ${hrs} tiếng ${mins} phút`;
+          }
+        }
+        act.innerHTML = 'Active: <span style="color:#6b7494">' + activeStr + "</span>";
+        card.appendChild(act);
+
+        // Ẩn hết nếu off
+        if (isOff) {
+          [ah, cpuram, act].forEach(el => el.style.display = "none");
+        }
+
+        grid.appendChild(card);
+      }
+
+      // App Online
+      document.getElementById("appOnline").textContent = "App Online: " + (data.app_uptime || "--:--:--");
+
+      // Cập Nhật
+      const now = new Date();
+      const timeStr = pad(now.getHours()) + ":" + pad(now.getMinutes()) + ":" + pad(now.getSeconds());
+      const dateStr = pad(now.getDate()) + "/" + pad(now.getMonth()+1) + "/" + now.getFullYear();
+      const st = data.server_time || "";
+      const serverEl = document.getElementById("serverTime");
+
+      let anyActive = false;
+      for (let i = 1; i <= 4; i++) {
+        const nv = data[`nv${i}`];
+        if (nv && nv.state && nv.state !== "off") { anyActive = true; break; }
+      }
+
+      if (!anyActive) {
+        serverEl.innerHTML = '<span class="c-red">Mất tín hiệu: ' + timeStr + '</span>';
+      } else {
+        serverEl.innerHTML =
+          'Cập Nhật: <span class="val-green">' + (st || timeStr) + '</span>' +
+          ' <span style="color:#6b7494">' + dateStr + '</span>';
+      }
+
+      // Online box — App Online
+      const onlineWrap = document.getElementById("onlineWrap");
+      onlineWrap.style.display = "none";
+
+    });
+  }
+</script>
+</body>
+</html>
