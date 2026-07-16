@@ -121,7 +121,11 @@
 <div class="grid" id="grid"></div>
 
 <div class="bottom">
-  <span class="bottom-left" id="appOnline">App Online: --:--:--</span>
+  <span class="bottom-left">
+    <span id="appOnline">Uptime: --:--:--</span>
+    <span style="color:#252a38;"> | </span>
+    <span id="zoneCountdown">Zone: 00:00:00</span>
+  </span>
   <span class="bottom-right" id="serverTime">Cập Nhật: --</span>
 </div>
 
@@ -233,7 +237,13 @@
       }
 
       // App Online
-      document.getElementById("appOnline").textContent = "App Online: " + (data.app_uptime || "--:--:--");
+      document.getElementById("appOnline").textContent = "Uptime: " + (data.app_uptime || "--:--:--");
+
+      // Zone Countdown
+      const zoneEl = document.getElementById("zoneCountdown");
+      const zoneVal = data.zone_countdown || "00:00:00";
+      zoneEl.textContent = "Zone: " + zoneVal;
+      zoneEl.style.color = (zoneVal !== "00:00:00") ? "#ffd700" : "#6b7494";
 
       // Cập Nhật
       const now = new Date();
@@ -277,7 +287,7 @@
         eventsEmpty.style.display = "block";
       } else {
         eventsEmpty.style.display = "none";
-        events.slice(-20).forEach(msg => {
+        events.slice(0, 30).forEach(msg => {
           const div = document.createElement("div");
           const isFail = msg.includes("không biến hình");
           div.className = "event-line " + (isFail ? "fail" : "ok");
