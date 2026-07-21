@@ -58,6 +58,7 @@
   .c-border  { color: #252a38; }
   .c-green   { color: #00e676; }
   .c-red     { color: #ff4444; }
+  .c-blue    { color: #4da3ff; }
 
   /* --- BOTTOM BAR --- */
   .bottom {
@@ -179,13 +180,17 @@
         nameDiv.textContent = nv.name || `NV${i}`;
         card.appendChild(nameDiv);
 
-        // -- Biến hình
+        // -- Biến hình | Loại biến hình
         const bh = document.createElement("div");
         bh.className = "card-line c-muted";
-        bh.textContent = "Biến hình: " + (nv.countdown || "--:--:--");
+        let bhTypeHtml = "";
+        if (nv.bh_type) {
+          bhTypeHtml = ' <span style="color:#6b7494">| </span><span class="c-blue">' + nv.bh_type + "</span>";
+        }
+        bh.innerHTML = "Biến hình: " + (nv.countdown || "--:--:--") + bhTypeHtml;
         card.appendChild(bh);
 
-        // -- Auto Hunting
+        // -- Auto Hunting | Keyboard
         const ah = document.createElement("div");
         ah.className = "card-line c-muted";
         let huntVal = "";
@@ -196,20 +201,16 @@
         } else {
           huntVal = '<span style="color:#ff4444;font-weight:bold">OFF</span>';
         }
-        ah.innerHTML = '<span style="color:#6b7494">Auto Hunting: </span>' + huntVal;
+        const kbOn = nv.keyboard === "ON";
+        const kbVal = kbOn
+          ? '<span style="color:#00e676;font-weight:bold">ON</span>'
+          : '<span style="color:#6b7494">OFF</span>';
+        ah.innerHTML =
+          '<span style="color:#6b7494">Auto Hunting: </span>' + huntVal +
+          '<span style="color:#6b7494"> | Keyboard: </span>' + kbVal;
         card.appendChild(ah);
 
-        // -- CPU | RAM
-        const cpuram = document.createElement("div");
-        cpuram.className = "card-line";
-        const cpuCol = nv.cpu  ? "#dde1f0" : "#252a38";
-        const ramCol = nv.ram  ? "#dde1f0" : "#252a38";
-        cpuram.innerHTML =
-          `<span style="color:#6b7494">CPU: </span><span style="color:${cpuCol}">${nv.cpu || "---"}</span>` +
-          `<span style="color:#6b7494"> | RAM: </span><span style="color:${ramCol}">${nv.ram || "---"}</span>`;
-        card.appendChild(cpuram);
-
-        // -- Active
+        // -- Active | RAM
         const act = document.createElement("div");
         act.className = "card-line c-muted";
         let activeStr = "--:--";
@@ -225,12 +226,15 @@
             activeStr = `${days} ngày ${hrs} tiếng ${mins} phút`;
           }
         }
-        act.innerHTML = 'Active: <span style="color:#6b7494">' + activeStr + "</span>";
+        const ramCol = nv.ram ? "#dde1f0" : "#252a38";
+        act.innerHTML =
+          'Active: <span style="color:#6b7494">' + activeStr + "</span>" +
+          '<span style="color:#6b7494"> | RAM: </span><span style="color:' + ramCol + '">' + (nv.ram || "---") + "</span>";
         card.appendChild(act);
 
         // Ẩn hết nếu off
         if (isOff) {
-          [bh, ah, cpuram, act].forEach(el => el.style.display = "none");
+          [bh, ah, act].forEach(el => el.style.display = "none");
         }
 
         grid.appendChild(card);
@@ -289,7 +293,7 @@
         eventsEmpty.style.display = "none";
         events.slice(0, 30).forEach(msg => {
           const div = document.createElement("div");
-          const isFail = msg.includes("không biến hình");
+          const isFail = msg.includes("không biến hình") || msg.includes("thất bại");
           div.className = "event-line " + (isFail ? "fail" : "ok");
           div.textContent = msg;
           eventsList.appendChild(div);
