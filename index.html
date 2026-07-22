@@ -180,14 +180,16 @@
         nameDiv.textContent = nv.name || `NV${i}`;
         card.appendChild(nameDiv);
 
-        // -- Biến hình | Loại biến hình
+        // -- Biến hình | Loại biến hình | RAM
         const bh = document.createElement("div");
         bh.className = "card-line c-muted";
         let bhTypeHtml = "";
         if (nv.bh_type) {
           bhTypeHtml = ' <span style="color:#6b7494">| </span><span class="c-blue">' + nv.bh_type + "</span>";
         }
-        bh.innerHTML = "Biến hình: " + (nv.countdown || "--:--:--") + bhTypeHtml;
+        const ramCol = nv.ram ? "#dde1f0" : "#252a38";
+        const ramHtml = ' <span style="color:#6b7494">| Ram: </span><span style="color:' + ramCol + '">' + (nv.ram || "---") + "</span>";
+        bh.innerHTML = "Biến hình: " + (nv.countdown || "--:--:--") + bhTypeHtml + ramHtml;
         card.appendChild(bh);
 
         // -- Auto Hunting | Keyboard
@@ -210,7 +212,7 @@
           '<span style="color:#6b7494"> | Keyboard: </span>' + kbVal;
         card.appendChild(ah);
 
-        // -- Active | RAM
+        // -- Active
         const act = document.createElement("div");
         act.className = "card-line c-muted";
         let activeStr = "--:--";
@@ -226,10 +228,7 @@
             activeStr = `${days} ngày ${hrs} tiếng ${mins} phút`;
           }
         }
-        const ramCol = nv.ram ? "#dde1f0" : "#252a38";
-        act.innerHTML =
-          'Active: <span style="color:#6b7494">' + activeStr + "</span>" +
-          '<span style="color:#6b7494"> | RAM: </span><span style="color:' + ramCol + '">' + (nv.ram || "---") + "</span>";
+        act.innerHTML = 'Active: <span style="color:#6b7494">' + activeStr + "</span>";
         card.appendChild(act);
 
         // Ẩn hết nếu off
