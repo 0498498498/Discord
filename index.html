@@ -174,22 +174,32 @@
         const card  = document.createElement("div");
         card.className = "card" + (isOff ? " muted" : "");
 
-        // -- Tên nhân vật
+        // -- Tên nhân vật | RAM (góc phải)
         const nameDiv = document.createElement("div");
         nameDiv.className = "card-line c-name" + (isOff ? " off" : "");
-        nameDiv.textContent = nv.name || `NV${i}`;
+        nameDiv.style.display = "flex";
+        nameDiv.style.justifyContent = "space-between";
+        nameDiv.style.alignItems = "center";
+        const ramCol = nv.ram ? "#dde1f0" : "#252a38";
+        const nameSpan = document.createElement("span");
+        nameSpan.textContent = nv.name || `NV${i}`;
+        const ramSpan = document.createElement("span");
+        ramSpan.style.fontWeight = "normal";
+        ramSpan.style.fontSize = "10px";
+        ramSpan.innerHTML = '<span style="color:#6b7494">Ram: </span><span style="color:' + ramCol + '">' + (nv.ram || "---") + "</span>";
+        nameDiv.appendChild(nameSpan);
+        nameDiv.appendChild(ramSpan);
+        if (isOff) ramSpan.style.display = "none";
         card.appendChild(nameDiv);
 
-        // -- Biến hình | Loại biến hình | RAM
+        // -- Biến hình | Loại biến hình
         const bh = document.createElement("div");
         bh.className = "card-line c-muted";
         let bhTypeHtml = "";
         if (nv.bh_type) {
           bhTypeHtml = ' <span style="color:#6b7494">| </span><span class="c-blue">' + nv.bh_type + "</span>";
         }
-        const ramCol = nv.ram ? "#dde1f0" : "#252a38";
-        const ramHtml = ' <span style="color:#6b7494">| Ram: </span><span style="color:' + ramCol + '">' + (nv.ram || "---") + "</span>";
-        bh.innerHTML = "Biến hình: " + (nv.countdown || "--:--:--") + bhTypeHtml + ramHtml;
+        bh.innerHTML = "Biến hình: " + (nv.countdown || "--:--:--") + bhTypeHtml;
         card.appendChild(bh);
 
         // -- Auto Hunting | Keyboard
